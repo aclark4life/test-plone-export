@@ -15,8 +15,11 @@ def traverse_and_export(context, base_path):
     # Debug: print catalog details
     print(f"Catalog found: {catalog}")
     
-    # More specific query
-    query = {'portal_type': 'Document'}  # Adjust 'Document' to the relevant content type(s)
+    # Comprehensive query to include multiple content types and nested content
+    query = {
+        'portal_type': ['Document', 'News Item', 'File', 'Folder'],  # Adjust content types as needed
+        'path': '/'.join(context.getPhysicalPath())
+    }
     results = catalog.unrestrictedSearchResults(query)
     
     # Debug: print number of results
@@ -41,8 +44,13 @@ def traverse_and_export(context, base_path):
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             print(f"Created directories for {os.path.dirname(file_path)}.")
             
-            # Write content to file
-            content = f"Title: {obj.Title()}\n\nDescription: {obj.Description()}\n\nText: {obj.getText()}"
+            # Write content to file based on type
+            content = f"Title: {obj.Title()}\n\nDescription: {obj.Description()}\n\n"
+            if obj.portal_type in ['Document', 'News Item']:
+                content += f"Text: {obj.getText()}"
+            elif obj.portal_type == 'File':
+                content += f"File: {obj.getFile().data}"
+            
             write_content_to_file(file_path + '.txt', content)
             print(f"Exported: {file_path}.txt")
         
