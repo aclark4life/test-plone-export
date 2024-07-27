@@ -121,6 +121,34 @@ class CustomAdminConfig(AdminConfig):
     default_site = "backend.admin.CustomAdminSite"
 endef
 
+define BACKEND_UTILS
+import requests
+
+
+def get_ec2_metadata():
+    try:
+        # Step 1: Get the token
+        token_url = "http://169.254.169.254/latest/api/token"
+        headers = {"X-aws-ec2-metadata-token-ttl-seconds": "21600"}
+        response = requests.put(token_url, headers=headers)
+        response.raise_for_status()  # Raise an error for bad responses
+
+        token = response.text
+
+        # Step 2: Use the token to get the instance metadata
+        metadata_url = "http://169.254.169.254/latest/meta-data/local-ipv4"
+        headers = {"X-aws-ec2-metadata-token": token}
+        response = requests.get(metadata_url, headers=headers)
+        response.raise_for_status()  # Raise an error for bad responses
+
+        metadata = response.text
+        return metadata
+    except requests.RequestException as e:
+        print(f"Error retrieving EC2 metadata: {e}")
+        return None
+
+endef
+
 define DJANGO_URLS
 from django.conf import settings
 from django.urls import include, path
@@ -168,89 +196,6 @@ urlpatterns += [
     path("api/", include("rest_framework.urls", namespace="rest_framework")),
     path("api/", include("dj_rest_auth.urls")),
     # path("api/register/", RegisterView.as_view(), name="register"),
-]
-endef
-
-define WAGTAIL_URLS
-from django.conf import settings
-from django.urls import include, path
-from django.contrib import admin
-
-from wagtail.admin import urls as wagtailadmin_urls
-from wagtail import urls as wagtail_urls
-from wagtail.documents import urls as wagtaildocs_urls
-
-from rest_framework import routers, serializers, viewsets
-from dj_rest_auth.registration.views import RegisterView
-
-from siteuser.models import User
-
-urlpatterns = []
-
-if settings.DEBUG:
-	urlpatterns += [
-		path("django/doc/", include("django.contrib.admindocs.urls")),
-	]
-
-urlpatterns += [
-    path('accounts/', include('allauth.urls')),
-    path('django/', admin.site.urls),
-    path('wagtail/', include(wagtailadmin_urls)),
-    path('user/', include('siteuser.urls')),
-    path('search/', include('search.urls')),
-    path('model-form-demo/', include('model_form_demo.urls')),
-    path('explorer/', include('explorer.urls')),
-    path('logging-demo/', include('logging_demo.urls')),
-    path('payments/', include('payments.urls')),
-]
-
-if settings.DEBUG:
-    from django.conf.urls.static import static
-    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
-    # Serve static and media files from development server
-    urlpatterns += staticfiles_urlpatterns()
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-    import debug_toolbar
-    urlpatterns += [
-        path("__debug__/", include(debug_toolbar.urls)),
-    ]
-
-
-# https://www.django-rest-framework.org/#example
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'is_staff']
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-
-urlpatterns += [
-    path("api/", include(router.urls)),
-    path("api/", include("rest_framework.urls", namespace="rest_framework")),
-    path("api/", include("dj_rest_auth.urls")),
-    # path("api/register/", RegisterView.as_view(), name="register"),
-]
-
-urlpatterns += [
-    path("hijack/", include("hijack.urls")),
-]
-
-urlpatterns += [
-    # For anything not caught by a more specific rule above, hand over to
-    # Wagtail's page serving mechanism. This should be the last pattern in
-    # the list:
-    path("", include(wagtail_urls)),
-
-    # Alternatively, if you want Wagtail pages to be served from a subpath
-    # of your site, rather than the site root:
-    #    path("pages/", include(wagtail_urls)),
 ]
 endef
 
@@ -882,6 +827,14 @@ try:
     from .local import *
 except ImportError:
     pass
+endef
+
+define DJANGO_SETTINGS_PROD
+# project-makefile
+from backend.utils import get_ec2_metadata
+
+LOCAL_IPV4 = get_ec2_metadata()
+ALLOWED_HOSTS.append(LOCAL_IPV4)
 endef
 
 define DJANGO_MANAGE_PY
@@ -1698,6 +1651,38 @@ define PAYMENTS_VIEW_TEMPLATE_SUCCESS
 </html>
 endef
 
+define PYTHON_CI_YAML
+name: Build Wheels
+endef
+
+define PYTHON_LICENSE_TXT
+MIT License
+
+Copyright (c) [YEAR] [OWNER NAME]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+endef
+
+define PYTHON_PROJECT_TOML
+[build-system]
+endef
+
 define REQUIREMENTS_TEST
 pytest
 pytest-runner
@@ -1822,6 +1807,90 @@ urlpatterns = [
     path("", search, name="search")
 ]
 endef
+
+define WAGTAIL_URLS
+from django.conf import settings
+from django.urls import include, path
+from django.contrib import admin
+
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
+
+from rest_framework import routers, serializers, viewsets
+from dj_rest_auth.registration.views import RegisterView
+
+from siteuser.models import User
+
+urlpatterns = []
+
+if settings.DEBUG:
+	urlpatterns += [
+		path("django/doc/", include("django.contrib.admindocs.urls")),
+	]
+
+urlpatterns += [
+    path('accounts/', include('allauth.urls')),
+    path('django/', admin.site.urls),
+    path('wagtail/', include(wagtailadmin_urls)),
+    path('user/', include('siteuser.urls')),
+    path('search/', include('search.urls')),
+    path('model-form-demo/', include('model_form_demo.urls')),
+    path('explorer/', include('explorer.urls')),
+    path('logging-demo/', include('logging_demo.urls')),
+    path('payments/', include('payments.urls')),
+]
+
+if settings.DEBUG:
+    from django.conf.urls.static import static
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+    # Serve static and media files from development server
+    urlpatterns += staticfiles_urlpatterns()
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    import debug_toolbar
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ]
+
+
+# https://www.django-rest-framework.org/#example
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ['url', 'username', 'email', 'is_staff']
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+
+urlpatterns += [
+    path("api/", include(router.urls)),
+    path("api/", include("rest_framework.urls", namespace="rest_framework")),
+    path("api/", include("dj_rest_auth.urls")),
+    # path("api/register/", RegisterView.as_view(), name="register"),
+]
+
+urlpatterns += [
+    path("hijack/", include("hijack.urls")),
+]
+
+urlpatterns += [
+    # For anything not caught by a more specific rule above, hand over to
+    # Wagtail's page serving mechanism. This should be the last pattern in
+    # the list:
+    path("", include(wagtail_urls)),
+
+    # Alternatively, if you want Wagtail pages to be served from a subpath
+    # of your site, rather than the site root:
+    #    path("pages/", include(wagtail_urls)),
+]
+endef
+
 
 define SETTINGS_THEMES
 THEMES = [
@@ -2345,6 +2414,7 @@ export CUSTOM_ENV_VAR_FILE
 export DJANGO_BASE_TEMPLATE
 export DJANGO_MANAGE_PY
 export DJANGO_SETTINGS_DEV
+export DJANGO_SETTINGS_PROD
 export DJANGO_URLS
 export DJANGO_HOME_PAGE_URLS
 export DJANGO_HOME_PAGE_VIEWS
@@ -2387,8 +2457,6 @@ export PRIVACY_PAGE_MODEL
 export REST_FRAMEWORK
 export FRONTEND_CONTEXT_INDEX
 export FRONTEND_CONTEXT_USER_PROVIDER
-export PRIVACY_PAGE_MODEL
-export PRIVACY_PAGE_TEMPLATE
 export PAYMENTS_ADMIN
 export PAYMENTS_FORM
 export PAYMENTS_MIGRATION
@@ -2397,6 +2465,11 @@ export PAYMENTS_URLS
 export PAYMENTS_VIEW
 export PAYMENTS_VIEW_TEMPLATE
 export PAYMENTS_VIEW_TEMPLATE_SUCCESS
+export PRIVACY_PAGE_MODEL
+export PRIVACY_PAGE_TEMPLATE
+export PYTHON_CI_YAML
+export PYTHON_LICENSE_TXT
+export PYTHON_PROJECT_TOML
 export REQUIREMENTS_TEST
 export SEPARATOR
 export SETTINGS_THEMES
@@ -2532,7 +2605,7 @@ eb-custom-env-default:
 eb-deploy-default:
 	eb deploy
 
-eb-pg-export-default:
+eb-pg-export-default: aws-check-env eb-check-env
 	@if [ ! -d $(EB_DIR) ]; then \
         echo "Directory $(EB_DIR) does not exist"; \
     else \
@@ -2599,6 +2672,9 @@ db-pg-init-test-default:
 
 db-pg-import-default:
 	@psql $(DATABASE_NAME) < $(DATABASE_NAME).sql
+
+django-backend-utils-default:
+	@echo "$$BACKEND_UTILS" > backend/utils.py
 
 django-custom-admin-default:
 	@echo "$$CUSTOM_ADMIN" > backend/admin.py
@@ -2850,6 +2926,7 @@ django-settings-directory-default:
 	@echo "import os" >> backend/settings/base.py
 	@echo "STATICFILES_DIRS = []" >> backend/settings/base.py
 	@echo "$$DJANGO_SETTINGS_DEV" > backend/settings/dev.py
+	@echo "$$DJANGO_SETTINGS_PROD" >> backend/settings/production.py
 
 django-settings-default:
 	@echo "# $(PROJECT_NAME)" >> $(SETTINGS)
@@ -3113,6 +3190,14 @@ project-mk-default:
 	touch project.mk
 	$(GIT_ADD) project.mk
 
+python-license-default:
+	@echo "$(PYTHON_LICENSE_TXT)" > LICENSE.txt
+	$(GIT_ADD) LICENSE.txt
+
+python-project-default:
+	@echo "$(PYTHON_PROJECT_TOML)" > pyproject.toml
+	$(GIT_ADD) pyproject.toml
+
 python-serve-default:
 	@echo "\n\tServing HTTP on http://0.0.0.0:8000\n"
 	python3 -m http.server
@@ -3122,6 +3207,11 @@ python-setup-sdist-default:
 
 python-webpack-init-default:
 	python manage.py webpack_init --no-input
+
+python-ci-default:
+	$(ADD_DIR) .github/workflows
+	@echo "$(PYTHON_CI_YAML)" > .github/workflows/build_wheels.yml
+	$(GIT_ADD) .github/workflows/build_wheels.yml
 
 rand-default:
 	@openssl rand -base64 12 | sed 's/\///g'
@@ -3391,6 +3481,7 @@ c-default: clean
 ce-default: git-commit-edit-push
 clean-default: wagtail-clean
 cp-default: git-commit-push
+create-default: eb-create
 d-default: deploy
 db-import-default: db-pg-import
 db-export-default: eb-pg-export
@@ -3413,6 +3504,7 @@ h-default: help
 i-default: install
 index-default: html-index
 last-default: git-commit-last
+license-default: python-license
 error-default: html-error
 eb-up-default: eb-upgrade
 init-default: wagtail-init
@@ -3429,6 +3521,8 @@ o-default: open
 open-default: django-open
 p-default: git-push
 pack-default: django-npm-build
+pip-install-up: pip-install-upgrade
+pyproject-default: python-project
 readme-default: readme-init-md
 restart-default: eb-restart
 reveal-default: reveal-init
