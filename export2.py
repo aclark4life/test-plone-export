@@ -57,7 +57,6 @@ def traverse_and_export(context, base_path):
 
     for brain in results:
         try:
-            import pdb; pdb.set_trace()
             obj = brain.getObject()
             print "Debug: Processing object with ID %s" % obj.getId()
             relative_path = "/".join(
