@@ -106,6 +106,7 @@ def main():
                       help="Base path where exported files will be saved.")
     (options, args) = parser.parse_args()
 
+    print options, args
     if not options.site_name or not options.export_base_path:
         parser.print_help()
         return
