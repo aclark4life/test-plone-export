@@ -10,7 +10,7 @@ def write_content_to_file(filepath, content, binary=False):
         mode = "wb"
     else:
         mode = "w"
-    with open(filepath, mode) as file:
+    file = open(filepath, mode):
         file.write(content)
 
 # Function to get the correct file extension based on MIME type
