@@ -62,7 +62,7 @@ def traverse_and_export(context, base_path):
             print "Debug: Can't get object"
             continue
         
-        print "Debug: Processing object with ID %s" % obj.getId()
+        # print "Debug: Processing object with ID %s" % obj.getId()
         relative_path = "/".join(
             obj.getPhysicalPath()[2:]
         )  # Get path relative to Plone site
