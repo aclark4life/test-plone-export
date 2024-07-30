@@ -69,9 +69,11 @@ def traverse_and_export(context, base_path):
         file_path = os.path.join(base_path, relative_path)
 
         # Debug: print object details
-        print "Debug: Object at %s with ID %s and type %s." % (
-            relative_path, obj.getId(), obj.portal_type
-        )
+        if obj.portal_type == "File":
+            extension = get_file_extension(mime_type)
+            print "Debug: Object at %s with ID %s and type %s and extension %s." % (
+                relative_path, obj.getId(), obj.portal_type, extension
+            )
 
         # Ensure the directory exists
         # dir_path = os.path.dirname(file_path)
