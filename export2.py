@@ -55,6 +55,7 @@ def traverse_and_export(context, base_path):
         print "- Check if the catalog is properly indexed."
         print "- Ensure that you have the necessary permissions to access content."
 
+    extensions = []
     for brain in results:
         try:
             obj = brain.getObject()
@@ -69,7 +70,6 @@ def traverse_and_export(context, base_path):
         file_path = os.path.join(base_path, relative_path)
 
         # Debug: print object details
-        extensions = []
         if obj.portal_type == "File":
             extension = get_file_extension(obj.get_content_type())
 
