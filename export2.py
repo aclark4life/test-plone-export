@@ -70,7 +70,7 @@ def traverse_and_export(context, base_path):
 
         # Debug: print object details
         if obj.portal_type == "File":
-            extension = get_file_extension(obj.file.contentType)
+            extension = get_file_extension(obj.contentType)
             print "Debug: Object at %s with ID %s and type %s and extension %s." % (
                 relative_path, obj.getId(), obj.portal_type, extension
             )
