@@ -80,14 +80,14 @@ def traverse_and_export(context, base_path):
                 content = "Title: %s\n\nDescription: %s\n\nText: %s" % (
                     obj.Title(), obj.Description(), obj.getText()
                 )
-                write_content_to_file(file_path + ".txt", content.encode("utf-8"))
+                # write_content_to_file(file_path + ".txt", content.encode("utf-8"))
                 print "Exported: %s.txt" % file_path
             elif obj.portal_type == "File":
                 if hasattr(obj, "file") and obj.file:
                     file_data = obj.file.data
                     mime_type = obj.file.contentType
                     extension = get_file_extension(mime_type)
-                    write_content_to_file(file_path + extension, file_data, binary=True)
+                    # write_content_to_file(file_path + extension, file_data, binary=True)
                     print "Exported: %s%s" % (file_path, extension)
                 else:
                     print "Skipping file export for %s due to missing file attribute." % file_path
