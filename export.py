@@ -59,8 +59,8 @@ def traverse_and_export(context, base_path):
             )
 
             # Ensure the directory exists
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            print(f"Created directories for {os.path.dirname(file_path)}.")
+            # os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            # print(f"Created directories for {os.path.dirname(file_path)}.")
 
             # Write content to file based on type
             if obj.portal_type in ["Document", "News Item"]:
