@@ -104,8 +104,8 @@ def traverse_and_export(context, base_path):
         # else:
         #     print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
 
-        print "File extensions:"
-        print " ".join(extensions)
+    print "File extensions:"
+    print " ".join(extensions)
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] site_name export_base_path")
