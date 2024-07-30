@@ -1,8 +1,9 @@
 import os
 import mimetypes
 import transaction
-from zope.component.hooks import setSite
+# from zope.component.hooks import setSite
 from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.utils import setSite
 
 # Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
