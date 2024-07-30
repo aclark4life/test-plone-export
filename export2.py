@@ -24,7 +24,12 @@ def get_file_extension(mime_type):
 
 # Function to traverse and export content
 def traverse_and_export(context, base_path):
+    print "Debug: Starting traverse_and_export"
+    
     catalog = getToolByName(context, "portal_catalog")
+    if not catalog:
+        print "Debug: Could not get 'portal_catalog' tool from context."
+        return
 
     # Debug: print catalog details
     print "Catalog found: %s" % catalog
@@ -39,10 +44,11 @@ def traverse_and_export(context, base_path):
         ],  # Adjust content types as needed
         "path": "/".join(context.getPhysicalPath()),
     }
+    print "Debug: Query for catalog: %s" % query
     results = catalog.unrestrictedSearchResults(query)
 
     # Debug: print number of results
-    print "Found %d content objects to export with query %s." % (len(results), query)
+    print "Debug: Found %d content objects to export with query %s." % (len(results), query)
 
     if len(results) == 0:
         print "No content found in the catalog. Please verify the following:"
@@ -53,20 +59,22 @@ def traverse_and_export(context, base_path):
     for brain in results:
         try:
             obj = brain.getObject()
+            print "Debug: Processing object with ID %s" % obj.getId()
             relative_path = "/".join(
                 obj.getPhysicalPath()[2:]
             )  # Get path relative to Plone site
             file_path = os.path.join(base_path, relative_path)
 
             # Debug: print object details
-            print "Processing object at %s with ID %s and type %s." % (
+            print "Debug: Object at %s with ID %s and type %s." % (
                 relative_path, obj.getId(), obj.portal_type
             )
 
             # Ensure the directory exists
-            if not os.path.exists(os.path.dirname(file_path)):
-                os.makedirs(os.path.dirname(file_path))
-                print "Created directories for %s." % os.path.dirname(file_path)
+            dir_path = os.path.dirname(file_path)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+                print "Created directories for %s." % dir_path
 
             # Write content to file based on type
             if obj.portal_type in ["Document", "News Item"]:
@@ -104,12 +112,15 @@ def main():
 
     try:
         site_name = options.site_name
-        print "Attempting to find site: %s" % site_name
+        print "Debug: Attempting to find site: %s" % site_name
+        
         site = getattr(app, site_name, None)
         if site is None:
+            print "Debug: Site %s not found directly. Trying 'Plone'." % site_name
             site = getattr(app, 'Plone', None)
             if site is None:
                 raise AttributeError("Site %s not found in app." % site_name)
+        
         print "Connected to Plone site: %s" % site
 
         export_base_path = options.export_base_path
