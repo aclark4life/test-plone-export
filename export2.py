@@ -69,8 +69,12 @@ def traverse_and_export(context, base_path):
         file_path = os.path.join(base_path, relative_path)
 
         # Debug: print object details
+        extensions = []
         if obj.portal_type == "File":
             extension = get_file_extension(obj.get_content_type())
+
+            if not extension in extensions:
+                extensions.append(extension)
             print "Debug: Object at %s with ID %s and type %s and extension %s." % (
                 relative_path, obj.getId(), obj.portal_type, extension
             )
@@ -99,6 +103,9 @@ def traverse_and_export(context, base_path):
         #         print "Skipping file export for %s due to missing file attribute." % file_path
         # else:
         #     print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
+
+        print "File extensions:"
+        print " ".join(extensions)
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] site_name export_base_path")
