@@ -65,14 +65,14 @@ def traverse_and_export(context, base_path):
             # Write content to file based on type
             if obj.portal_type in ["Document", "News Item"]:
                 content = f"Title: {obj.Title()}\n\nDescription: {obj.Description()}\n\nText: {obj.getText()}"
-                write_content_to_file(file_path + ".txt", content.encode("utf-8"))
+                # write_content_to_file(file_path + ".txt", content.encode("utf-8"))
                 print(f"Exported: {file_path}.txt")
             elif obj.portal_type == "File":
                 if hasattr(obj, "file") and obj.file:
                     file_data = obj.file.data
                     mime_type = obj.file.contentType
                     extension = get_file_extension(mime_type)
-                    write_content_to_file(file_path + extension, file_data, binary=True)
+                    # write_content_to_file(file_path + extension, file_data, binary=True)
                     print(f"Exported: {file_path}{extension}")
                 else:
                     print(
