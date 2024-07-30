@@ -6,7 +6,10 @@ from Products.CMFCore.utils import getToolByName
 
 # Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
-    mode = "wb" if binary else "w"
+    if binary:
+        mode = "wb"
+    else:
+        mode = "w"
     with open(filepath, mode) as file:
         file.write(content)
 
