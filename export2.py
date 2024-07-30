@@ -106,30 +106,27 @@ def main():
         parser.print_help()
         return
 
-    try:
-        site_name = options.site_name
-        print "Debug: Attempting to find site: %s" % site_name
-        
-        site = getattr(app, site_name, None)
+    site_name = options.site_name
+    print "Debug: Attempting to find site: %s" % site_name
+    
+    site = getattr(app, site_name, None)
+    if site is None:
+        print "Debug: Site %s not found directly. Trying 'Plone'." % site_name
+        site = getattr(app, 'Plone', None)
         if site is None:
-            print "Debug: Site %s not found directly. Trying 'Plone'." % site_name
-            site = getattr(app, 'Plone', None)
-            if site is None:
-                raise AttributeError("Site %s not found in app." % site_name)
-        
-        print "Connected to Plone site: %s" % site
+            raise AttributeError("Site %s not found in app." % site_name)
+    
+    print "Connected to Plone site: %s" % site
 
-        export_base_path = options.export_base_path
-        if not os.path.exists(export_base_path):
-            os.makedirs(export_base_path)
-            print "Created export base directory at %s." % export_base_path
+    export_base_path = options.export_base_path
+    if not os.path.exists(export_base_path):
+        os.makedirs(export_base_path)
+        print "Created export base directory at %s." % export_base_path
 
-        traverse_and_export(site, export_base_path)
-        transaction.commit()
-        print "Export completed."
+    traverse_and_export(site, export_base_path)
+    transaction.commit()
+    print "Export completed."
 
-    except Exception, e:
-        print "Error: %s" % str(e)
 
 if __name__ == "__main__":
     main()
