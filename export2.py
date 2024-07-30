@@ -56,46 +56,42 @@ def traverse_and_export(context, base_path):
         print "- Ensure that you have the necessary permissions to access content."
 
     for brain in results:
-        try:
-            obj = brain.getObject()
-            print "Debug: Processing object with ID %s" % obj.getId()
-            relative_path = "/".join(
-                obj.getPhysicalPath()[2:]
-            )  # Get path relative to Plone site
-            file_path = os.path.join(base_path, relative_path)
+        obj = brain.getObject()
+        print "Debug: Processing object with ID %s" % obj.getId()
+        relative_path = "/".join(
+            obj.getPhysicalPath()[2:]
+        )  # Get path relative to Plone site
+        file_path = os.path.join(base_path, relative_path)
 
-            # Debug: print object details
-            print "Debug: Object at %s with ID %s and type %s." % (
-                relative_path, obj.getId(), obj.portal_type
+        # Debug: print object details
+        print "Debug: Object at %s with ID %s and type %s." % (
+            relative_path, obj.getId(), obj.portal_type
+        )
+
+        # Ensure the directory exists
+        # dir_path = os.path.dirname(file_path)
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+            print "Created directories for %s." % file_path
+
+        # Write content to file based on type
+        if obj.portal_type in ["Document", "News Item"]:
+            content = "Title: %s\n\nDescription: %s\n\nText: %s" % (
+                obj.Title(), obj.Description(), obj.getText()
             )
-
-            # Ensure the directory exists
-            # dir_path = os.path.dirname(file_path)
-            if not os.path.exists(file_path):
-                os.makedirs(file_path)
-                print "Created directories for %s." % file_path
-
-            # Write content to file based on type
-            if obj.portal_type in ["Document", "News Item"]:
-                content = "Title: %s\n\nDescription: %s\n\nText: %s" % (
-                    obj.Title(), obj.Description(), obj.getText()
-                )
-                write_content_to_file(os.path.join(file_path, file_path + ".txt"), content.encode("utf-8"))
-                print "Exported: %s.txt" % file_path
-            elif obj.portal_type == "File":
-                if hasattr(obj, "file") and obj.file:
-                    file_data = obj.file.data
-                    mime_type = obj.file.contentType
-                    extension = get_file_extension(mime_type)
-                    write_content_to_file(file_path + extension, file_data, binary=True)
-                    print "Exported: %s%s" % (file_path, extension)
-                else:
-                    print "Skipping file export for %s due to missing file attribute." % file_path
+            write_content_to_file(os.path.join(file_path, file_path + ".txt"), content.encode("utf-8"))
+            print "Exported: %s.txt" % file_path
+        elif obj.portal_type == "File":
+            if hasattr(obj, "file") and obj.file:
+                file_data = obj.file.data
+                mime_type = obj.file.contentType
+                extension = get_file_extension(mime_type)
+                write_content_to_file(file_path + extension, file_data, binary=True)
+                print "Exported: %s%s" % (file_path, extension)
             else:
-                print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
-
-        except Exception, e:
-            print "Error processing object at %s: %s" % (brain.getPath(), str(e))
+                print "Skipping file export for %s due to missing file attribute." % file_path
+        else:
+            print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] site_name export_base_path")
