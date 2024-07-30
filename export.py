@@ -47,6 +47,7 @@ def traverse_and_export(context, base_path):
 
     for brain in results:
         try:
+            import pdb; pdb.set_trace()
             obj = brain.getObject()
             relative_path = "/".join(
                 obj.getPhysicalPath()[2:]
