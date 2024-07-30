@@ -82,8 +82,9 @@ def traverse_and_export(context, base_path):
             else:
                 print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
 
-        except Exception as e:
-            print "Error processing object at %s: %s" % (brain.getPath(), str(e))
+        except Exception: 
+            # print "Error processing object at %s: %s" % (brain.getPath(), str(e))
+            print "Error processing object at %" % brain.getPath()
 
 def main(app):
     try:
