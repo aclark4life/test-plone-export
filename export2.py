@@ -104,9 +104,13 @@ def main():
 
     try:
         # Access the Plone site based on the provided site name
-        site = getattr(app, options.site_name, None)
+        site_name = options.site_name
+        site = getattr(app, site_name, None)
         if site is None:
-            raise AttributeError("Site %s not found in app." % options.site_name)
+            # Try accessing the site through 'app.Plone' if not found
+            site = getattr(app, 'Plone', None)
+            if site is None:
+                raise AttributeError("Site %s not found in app." % site_name)
 
         # Debug: print site details
         print "Connected to Plone site: %s" % site
@@ -120,9 +124,6 @@ def main():
         transaction.commit()
         print "Export completed."
 
-    except AttributeError:
-        print "Error: Could not find the Plone site %s in app." % options.site_name
+    except AttributeError as e:
+        print "Error: Could not find the Plone site %s in app. %s" % (options.site_name, str(e))
         print "Make sure the Plone site exists and is correctly referenced."
-
-if __name__ == "__main__":
-    main()
