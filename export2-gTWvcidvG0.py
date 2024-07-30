@@ -80,4 +80,43 @@ def traverse_and_export(context, base_path):
                     file_data = obj.file.data
                     mime_type = obj.file.contentType
                     extension = get_file_extension(mime_type)
-                    write_content_to_file(file_path + extension
+                    write_content_to_file(file_path + extension, file_data, binary=True)
+                    print "Exported: %s%s" % (file_path, extension)
+                else:
+                    print "Skipping file export for %s due to missing file attribute." % file_path
+            else:
+                print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
+
+        except Exception, e:
+            print "Error processing object at %s: %s" % (brain.getPath(), str(e))
+
+def main():
+    parser = argparse.ArgumentParser(description="Export content from a Plone site.")
+    parser.add_argument('site_name', help="The name of the Plone site to export from.")
+    parser.add_argument('export_base_path', help="The base path where exported files will be saved.")
+    args = parser.parse_args()
+
+    try:
+        # Access the Plone site based on the provided site name
+        site = getattr(app, args.site_name, None)
+        if site is None:
+            raise AttributeError("Site %s not found in app." % args.site_name)
+
+        # Debug: print site details
+        print "Connected to Plone site: %s" % site
+
+        export_base_path = args.export_base_path
+        if not os.path.exists(export_base_path):
+            os.makedirs(export_base_path)
+            print "Created export base directory at %s." % export_base_path
+
+        traverse_and_export(site, export_base_path)
+        transaction.commit()
+        print "Export completed."
+
+    except AttributeError:
+        print "Error: Could not find the Plone site %s in app." % args.site_name
+        print "Make sure the Plone site exists and is correctly referenced."
+
+if __name__ == "__main__":
+    main()
