@@ -1,9 +1,7 @@
 import os
 import mimetypes
 import transaction
-# from zope.component.hooks import setSite
 from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.utils import setSite
 
 # Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
@@ -90,7 +88,6 @@ def traverse_and_export(context, base_path):
 def main(app):
     try:
         site = app.Plone
-        setSite(site)
 
         # Debug: print site details
         print "Connected to Plone site: %s" % site
