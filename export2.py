@@ -119,6 +119,7 @@ def main():
         if site is None:
             print "Debug: Site %s not found directly. Trying 'Plone'." % site_name
             site = getattr(app, 'Plone', None)
+            import pdb; pdb.set_trace()
             if site is None:
                 raise AttributeError("Site %s not found in app." % site_name)
         
