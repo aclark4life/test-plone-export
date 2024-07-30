@@ -3,7 +3,6 @@ import mimetypes
 import transaction
 from optparse import OptionParser
 from Products.CMFCore.utils import getToolByName
-from Zope2 import app
 
 # Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
@@ -119,7 +118,6 @@ def main():
         if site is None:
             print "Debug: Site %s not found directly. Trying 'Plone'." % site_name
             site = getattr(app, 'Plone', None)
-            import pdb; pdb.set_trace()
             if site is None:
                 raise AttributeError("Site %s not found in app." % site_name)
         
