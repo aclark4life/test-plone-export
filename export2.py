@@ -1,7 +1,7 @@
 import os
 import mimetypes
 import transaction
-import argparse
+from optparse import OptionParser
 from Products.CMFCore.utils import getToolByName
 from Zope2 import app
 
@@ -91,21 +91,27 @@ def traverse_and_export(context, base_path):
             print "Error processing object at %s: %s" % (brain.getPath(), str(e))
 
 def main():
-    parser = argparse.ArgumentParser(description="Export content from a Plone site.")
-    parser.add_argument('site_name', help="The name of the Plone site to export from.")
-    parser.add_argument('export_base_path', help="The base path where exported files will be saved.")
-    args = parser.parse_args()
+    parser = OptionParser(usage="usage: %prog [options] site_name export_base_path")
+    parser.add_option("-s", "--site", dest="site_name",
+                      help="Name of the Plone site to export from.")
+    parser.add_option("-e", "--export", dest="export_base_path",
+                      help="Base path where exported files will be saved.")
+    (options, args) = parser.parse_args()
+
+    if not options.site_name or not options.export_base_path:
+        parser.print_help()
+        return
 
     try:
         # Access the Plone site based on the provided site name
-        site = getattr(app, args.site_name, None)
+        site = getattr(app, options.site_name, None)
         if site is None:
-            raise AttributeError("Site %s not found in app." % args.site_name)
+            raise AttributeError("Site %s not found in app." % options.site_name)
 
         # Debug: print site details
         print "Connected to Plone site: %s" % site
 
-        export_base_path = args.export_base_path
+        export_base_path = options.export_base_path
         if not os.path.exists(export_base_path):
             os.makedirs(export_base_path)
             print "Created export base directory at %s." % export_base_path
@@ -115,7 +121,7 @@ def main():
         print "Export completed."
 
     except AttributeError:
-        print "Error: Could not find the Plone site %s in app." % args.site_name
+        print "Error: Could not find the Plone site %s in app." % options.site_name
         print "Make sure the Plone site exists and is correctly referenced."
 
 if __name__ == "__main__":
