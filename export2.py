@@ -57,6 +57,7 @@ def traverse_and_export(context, base_path):
 
     for brain in results:
         try:
+            import pdb; pdb.set_trace()
             obj = brain.getObject()
             print "Debug: Processing object with ID %s" % obj.getId()
             relative_path = "/".join(
@@ -70,10 +71,10 @@ def traverse_and_export(context, base_path):
             )
 
             # Ensure the directory exists
-            dir_path = os.path.dirname(file_path)
-            if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-                print "Created directories for %s." % dir_path
+            # dir_path = os.path.dirname(file_path)
+            # if not os.path.exists(dir_path):
+            #     os.makedirs(dir_path)
+            #     print "Created directories for %s." % dir_path
 
             # Write content to file based on type
             if obj.portal_type in ["Document", "News Item"]:
