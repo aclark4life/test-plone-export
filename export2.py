@@ -56,7 +56,12 @@ def traverse_and_export(context, base_path):
         print "- Ensure that you have the necessary permissions to access content."
 
     for brain in results:
-        obj = brain.getObject()
+        try:
+            obj = brain.getObject()
+        except:
+            print "Debug: Can't get object"
+            continue
+        
         print "Debug: Processing object with ID %s" % obj.getId()
         relative_path = "/".join(
             obj.getPhysicalPath()[2:]
