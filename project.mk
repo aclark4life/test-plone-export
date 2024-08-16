@@ -1,9 +1,2 @@
 PROJECT_NAME := test-plone-export
-
-serve:
-	$(MAKE) plone-serve
-
-.PHONY: export
-export:
-	echo $(PACKAGE_NAME)
-	python export.py
+PIP_INSTALL_PLONE_CONSTRAINTS = https://dist.plone.org/release/5.1-latest/constraints.txt
