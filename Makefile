@@ -1703,6 +1703,7 @@ _build/
 .elasticbeanstalk/
 db.sqlite3
 home/static
+backend/var
 endef
 
 define HTML_INDEX
@@ -3843,13 +3844,16 @@ plone-clean-default:
 	$(DEL_DIR) $(PROJECT_NAME)
 	$(DEL_DIR) $(PACKAGE_NAME)
 
-plone-init-default:
+plone-init-default: gitignore
 	$(PIP_ENSURE)
 	python -m pip install plone -c $(PIP_CONSTRAINTS_PLONE)
 	mkwsgiinstance -d backend -u admin:admin
 	cat backend/etc/zope.ini | sed -e 's/host = 127.0.0.1/host = 0.0.0.0/; s/port = 8080/port = 8000/' > $(TMPDIR)/zope.ini
 	mv -f $(TMPDIR)/zope.ini backend/etc/zope.ini
 	@echo "Created Plone instance in backend/!"
+	-$(GIT_ADD) backend/etc/site.zcml
+	-$(GIT_ADD) backend/etc/zope.conf
+	-$(GIT_ADD) backend/etc/zope.ini
 	$(MAKE) plone-serve
 
 plone-serve-default:
