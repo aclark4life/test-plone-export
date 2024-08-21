@@ -21,3 +21,7 @@ create-plone-site:
 
 serve:
 	$(MAKE) plone-serve
+
+
+init:
+	$(MAKE) git-commit-clean git-ignore git-commit-ignore plone-install plone-instance
