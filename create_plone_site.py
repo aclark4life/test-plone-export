@@ -1,8 +1,7 @@
 import sys
 from Products.CMFPlone.factory import addPloneSite
 from transaction import commit
-from Products.Archetypes.config import REFERENCE_CATALOG
-from Products.CMFCore.utils import getToolByName
+from plone.namedfile.file import NamedBlobFile
 
 def create_plone_site(app, ui_type="classic"):
     site_id = "Plone"
@@ -45,17 +44,19 @@ def create_plone_site(app, ui_type="classic"):
         site = app[site_id]
         file_id = "example-pdf"
         file_title = "Example PDF"
-        file_content_type = "application/pdf"
         
         with open("/path/to/your/file.pdf", "rb") as pdf_file:
             pdf_data = pdf_file.read()
 
+        # Create a NamedBlobFile for the PDF data
+        pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
+
+        # Add the File content type
         site.invokeFactory(
             type_name="File",
             id=file_id,
             title=file_title,
-            file=pdf_data,
-            content_type=file_content_type,
+            file=pdf_blob,
         )
 
         # Commit the transaction to save the changes
