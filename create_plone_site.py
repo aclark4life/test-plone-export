@@ -44,11 +44,12 @@ def create_plone_site(app, ui_type='classic'):
 # This is the entry point for zconsole run
 if __name__ == '__main__':
     app = globals().get('app')
-    
-    # Check command-line arguments
+
+    # The correct argument for UI type should be the last one
     if len(sys.argv) < 2:
         print("Usage: zconsole run create_plone_site.py <classic|volto>")
         sys.exit(1)
-    
-    ui_type = sys.argv[1].lower()
+
+    # Get the last argument which should be the UI type
+    ui_type = sys.argv[-1].lower()
     create_plone_site(app, ui_type)
