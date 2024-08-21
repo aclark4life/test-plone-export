@@ -40,29 +40,29 @@ def create_plone_site(app, ui_type="classic"):
 
         print(f"Plone site '{site_id}' with the {ui_type} UI created successfully.")
         
-        # Add a File with a PDF after site creation
+        # Add a Document or File with a PDF after site creation
         site = app[site_id]
-        file_id = "example-pdf"
-        file_title = "Example PDF"
+        item_id = "example-doc"
+        item_title = "Example Document"
         
-        with open("alex-clark-resume.pdf", "rb") as pdf_file:
+        with open("/path/to/your/file.pdf", "rb") as pdf_file:
             pdf_data = pdf_file.read()
 
         # Create a NamedBlobFile for the PDF data
         pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
 
-        # Add the File content type
+        # Use Document instead of File if File is not available
         site.invokeFactory(
-            type_name="File",
-            id=file_id,
-            title=file_title,
-            file=pdf_blob,
+            type_name="Document",  # Replace with "File" if it is available
+            id=item_id,
+            title=item_title,
+            text=pdf_blob,  # Use 'text' field for Document or 'file' for File
         )
 
         # Commit the transaction to save the changes
         commit()
 
-        print(f"PDF file '{file_id}' added to the site '{site_id}' successfully.")
+        print(f"PDF document '{item_id}' added to the site '{site_id}' successfully.")
     else:
         print(f"Plone site '{site_id}' already exists.")
 
