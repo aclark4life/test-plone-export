@@ -6,4 +6,4 @@ test:
 	$(MAKE) git-commit-init
 
 dump:
-	python export.py
+	.venv/bin/zconsole run backend/etc/zope.conf  export.py
