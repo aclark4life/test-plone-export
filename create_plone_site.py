@@ -13,6 +13,7 @@ def create_plone_site(app, ui_type="classic"):
             add_on_profiles = [
                 "Products.CMFPlone:plone",  # Classic Plone UI
                 "plonetheme.barceloneta:default",  # Default theme for classic UI
+                "plone.app.dexterity:default"  # Dexterity content types
             ]
             title = "My Classic Plone Site"
         elif ui_type == "volto":
@@ -20,6 +21,7 @@ def create_plone_site(app, ui_type="classic"):
                 "Products.CMFPlone:plone",  # Base Plone setup
                 "plone.restapi:default",  # REST API needed for Volto
                 "plone.volto:default",  # Volto frontend
+                "plone.app.dexterity:default"  # Dexterity content types
             ]
             title = "My Volto Plone Site"
         else:
@@ -40,21 +42,21 @@ def create_plone_site(app, ui_type="classic"):
 
         print(f"Plone site '{site_id}' with the {ui_type} UI created successfully.")
         
-        # Add a File or other content type after site creation
+        # Add a File with a PDF after site creation
         site = app[site_id]
         item_id = "example-file"
         item_title = "Example File"
         
         try:
-            with open("alex-clark-resume.pdf", "rb") as pdf_file:
+            with open("/path/to/your/file.pdf", "rb") as pdf_file:
                 pdf_data = pdf_file.read()
 
             # Create a NamedBlobFile for the PDF data
             pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
 
-            # Try adding a File content type
+            # Add the File content type
             site.invokeFactory(
-                type_name="File",  # Check if "File" content type is available
+                type_name="File",  # Ensure "File" content type is available
                 id=item_id,
                 title=item_title,
                 file=pdf_blob,
@@ -63,7 +65,6 @@ def create_plone_site(app, ui_type="classic"):
         except ValueError:
             print("File content type not found. Checking other content types.")
             # Handle case where 'File' is not available
-            # Optionally, use another content type or raise an error
             raise
         
         # Commit the transaction to save the changes
