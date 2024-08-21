@@ -40,29 +40,35 @@ def create_plone_site(app, ui_type="classic"):
 
         print(f"Plone site '{site_id}' with the {ui_type} UI created successfully.")
         
-        # Add a Document or File with a PDF after site creation
+        # Add a File or other content type after site creation
         site = app[site_id]
-        item_id = "example-doc"
-        item_title = "Example Document"
+        item_id = "example-file"
+        item_title = "Example File"
         
-        with open("alex-clark-resume.pdf", "rb") as pdf_file:
-            pdf_data = pdf_file.read()
+        try:
+            with open("/path/to/your/file.pdf", "rb") as pdf_file:
+                pdf_data = pdf_file.read()
 
-        # Create a NamedBlobFile for the PDF data
-        pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
+            # Create a NamedBlobFile for the PDF data
+            pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
 
-        # Use Document instead of File if File is not available
-        site.invokeFactory(
-            type_name="Document",  # Replace with "File" if it is available
-            id=item_id,
-            title=item_title,
-            text=pdf_blob,  # Use 'text' field for Document or 'file' for File
-        )
-
+            # Try adding a File content type
+            site.invokeFactory(
+                type_name="File",  # Check if "File" content type is available
+                id=item_id,
+                title=item_title,
+                file=pdf_blob,
+            )
+            print(f"File '{item_id}' added to the site '{site_id}' successfully.")
+        except ValueError:
+            print("File content type not found. Checking other content types.")
+            # Handle case where 'File' is not available
+            # Optionally, use another content type or raise an error
+            raise
+        
         # Commit the transaction to save the changes
         commit()
 
-        print(f"PDF document '{item_id}' added to the site '{site_id}' successfully.")
     else:
         print(f"Plone site '{site_id}' already exists.")
 
