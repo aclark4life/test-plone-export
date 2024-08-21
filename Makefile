@@ -3803,7 +3803,7 @@ django-su-default:
 	DJANGO_SUPERUSER_PASSWORD=admin python manage.py createsuperuser --noinput --username=admin --email=$(PROJECT_EMAIL)
 
 .PHONY: django-test-default
-django-test-default: npm-install-django npm-build django-static
+django-test-default: npm-install django-static
 	-$(MAKE) pip-install-test
 	python manage.py test
 
@@ -3995,7 +3995,7 @@ git-commit-message-lint-default:
 
 .PHONY: git-commit-message-mk-default
 git-commit-message-mk-default:
-	-@$(GIT_COMMIT) -a -m "Add/update $(MAKEFILE_CUSTOM_FILE)"
+	-@$(GIT_COMMIT) project.mk -m "Add/update $(MAKEFILE_CUSTOM_FILE)"
 
 .PHONY: git-commit-message-rename-default
 git-commit-message-rename-default:
@@ -4512,11 +4512,20 @@ ce-default: git-commit-edit git-push
 .PHONY: clean-default
 clean-default: wagtail-clean
 
+.PHONY: cp-default
+cp-default: git-commit-message git-push
+
 .PHONY: db-dump-default
 db-dump-default: eb-export
 
 .PHONY: dbshell-default
 dbshell-default: django-db-shell
+
+.PHONY: deploy-default
+deploy-default: eb-deploy
+
+.PHONY: d-default
+d-default: eb-deploy
 
 .PHONY: deps-default
 deps-default: pip-deps
@@ -4532,6 +4541,9 @@ empty-default: git-commit-message-empty git-push
 
 .PHONY: fp-default
 fp-default: git-push-force
+
+.PHONY: freeze-default
+freeze-default: pip-freeze git-push
 
 .PHONY: git-commit-default
 git-commit-default: git-commit-message git-push
@@ -4556,6 +4568,9 @@ init-default: django-init-wagtail django-serve
 
 .PHONY: init-wagtail-default
 init-wagtail-default: django-init-wagtail
+
+.PHONY: install-default
+install-default: pip-install
 
 .PHONY: l-default
 l-default: makefile-list-commands
@@ -4602,11 +4617,17 @@ readme-default: readme-init
 .PHONY: rename-default
 rename-default: git-commit-message-rename git-push
 
+.PHONY: s-default
+s-default: django-serve
+
+.PHONY: shell-default
+shell-default: django-shell
+
 .PHONY: serve-default
 serve-default: django-serve
 
-.PHONY: s-default
-s-default: django-serve
+.PHONY: static-default
+static-default: django-static
 
 .PHONY: sort-default
 sort-default: git-commit-message-sort git-push
