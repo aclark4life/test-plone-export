@@ -4,3 +4,6 @@ PROJECT_NAME := test-plone-export
 test:
 	$(MAKE) clean git-commit-clean git-ignore git-commit-ignore plone-install plone-instance
 	$(MAKE) git-commit-init
+
+dump:
+	python export.py
