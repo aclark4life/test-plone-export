@@ -46,7 +46,7 @@ def create_plone_site(app, ui_type="classic"):
         item_title = "Example File"
         
         try:
-            with open("/path/to/your/file.pdf", "rb") as pdf_file:
+            with open("alex-clark-resume.pdf", "rb") as pdf_file:
                 pdf_data = pdf_file.read()
 
             # Create a NamedBlobFile for the PDF data
