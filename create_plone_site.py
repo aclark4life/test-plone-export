@@ -53,7 +53,7 @@ def create_plone_site(app, ui_type="classic"):
 
         # Add the File content type
         site.invokeFactory(
-            type_name="File",
+            type_name="Document",
             id=file_id,
             title=file_title,
             file=pdf_blob,
