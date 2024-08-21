@@ -7,3 +7,6 @@ test:
 
 dump:
 	.venv/bin/zconsole run backend/etc/zope.conf  export.py
+
+d:
+	$(MAKE) dump
