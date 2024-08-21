@@ -15,3 +15,6 @@ dump:
 
 d:
 	$(MAKE) dump
+
+create-plone-site:
+	.venv/bin/zconsole run backend/etc/zope.conf create_plone_site.py
