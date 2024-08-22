@@ -4230,7 +4230,9 @@ plone-install-default:
 plone-instance-default:
 	mkwsgiinstance -d backend -u admin:admin
 	cat backend/etc/zope.ini | sed -e 's/host = 127.0.0.1/host = 0.0.0.0/; s/port = 8080/port = 8000/' > $(TMPDIR)/zope.ini
-	$(shell sed -i '' '/path.*Data.fs/a\ blob-dir $INSTANCE/var/blobstorage\' backend/etc/zope.conf)
+	sed -i '' '/path.*Data.fs/a\
+     blob-dir $INSTANCE/var/blobstorage\
+' backend/etc/zope.conf
 	mv -f $(TMPDIR)/zope.ini backend/etc/zope.ini
 	-$(GIT_ADD) backend/etc/site.zcml
 	-$(GIT_ADD) backend/etc/zope.conf
