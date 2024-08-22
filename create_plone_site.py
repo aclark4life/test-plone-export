@@ -14,7 +14,7 @@ def create_plone_site(app, ui_type="classic"):
                 "Products.CMFPlone:plone",  # Classic Plone UI
                 "plonetheme.barceloneta:default",  # Default theme for classic UI
                 "plone.app.contenttypes:default",
-                "plone.app.contenttypes-plonecontent:default",
+                "plone.app.contenttypes-plone:default",
             ]
             title = "My Classic Plone Site"
         elif ui_type == "volto":
@@ -34,7 +34,7 @@ def create_plone_site(app, ui_type="classic"):
             site_id,
             title=title,
             extension_ids=add_on_profiles,
-            # setup_content=True,  # Optional: Create default content
+            setup_content=True,  # Optional: Create default content
         )
 
         # Commit the transaction to save the changes
