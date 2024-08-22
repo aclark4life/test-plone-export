@@ -55,4 +55,3 @@ if __name__ == "__main__":
     # Get the last argument which should be the UI type
     ui_type = sys.argv[-1].lower()
     create_plone_site(app, ui_type)
-
