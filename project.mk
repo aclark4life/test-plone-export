@@ -11,7 +11,7 @@ test:
 	$(MAKE) dump
 
 dump:
-	.venv/bin/zconsole run backend/etc/zope.conf  export.py
+	.venv/bin/zconsole run backend/etc/zope.conf export.py
 
 d:
 	$(MAKE) dump
