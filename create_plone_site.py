@@ -13,7 +13,7 @@ def create_plone_site(app, ui_type="classic"):
             add_on_profiles = [
                 "Products.CMFPlone:plone",  # Classic Plone UI
                 "plonetheme.barceloneta:default",  # Default theme for classic UI
-                "plone.app.contenttypes:default",  # Default theme for classic UI
+                "plone.app.contenttypes:default",  # Default content types
             ]
             title = "My Classic Plone Site"
         elif ui_type == "volto":
@@ -33,11 +33,11 @@ def create_plone_site(app, ui_type="classic"):
             site_id,
             title=title,
             extension_ids=add_on_profiles,
-            setup_content=True,  # Optional: Create default content
+            # setup_content=True,  # Optional: Create default content
         )
 
         # Commit the transaction to save the changes
-        # commit()
+        commit()
 
         print(f"Plone site '{site_id}' with the {ui_type} UI created successfully.")
     else:
@@ -56,3 +56,4 @@ if __name__ == "__main__":
     # Get the last argument which should be the UI type
     ui_type = sys.argv[-1].lower()
     create_plone_site(app, ui_type)
+
