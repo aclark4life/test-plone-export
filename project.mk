@@ -7,7 +7,7 @@ PROJECT_NAME := test-plone-export
 test:
 	$(MAKE) clean git-commit-clean git-ignore git-commit-ignore plone-install plone-instance
 	$(MAKE) git-commit-init
-	.venv/bin/zconsole run backend/etc/zope.conf create_plone_site.py classic
+	.venv/bin/zconsole run backend/etc/zope.conf create_plone_site.py classic alex-clark-resume.pdf
 	$(MAKE) dump
 
 dump:
@@ -17,7 +17,7 @@ d:
 	$(MAKE) dump
 
 create-plone-site:
-	.venv/bin/zconsole run backend/etc/zope.conf create_plone_site.py alex-clark-resume.pdf
+	.venv/bin/zconsole run backend/etc/zope.conf create_plone_site.py classic alex-clark-resume.pdf
 
 serve:
 	$(MAKE) plone-serve
