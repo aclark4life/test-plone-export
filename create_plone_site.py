@@ -82,14 +82,13 @@ if __name__ == "__main__":
     # Print raw arguments for debugging
     print(f"Raw arguments: {sys.argv}")
 
-    # Extract the relevant arguments
+    # Ensure that the correct number of arguments are provided
     if len(sys.argv) < 3:
         print("Usage: zconsole run create_plone_site.py <classic|volto> [pdf_path]")
         sys.exit(1)
 
-    # The second argument should be the UI type
-    ui_type = sys.argv[2].lower()
-    # The third argument should be the PDF path if provided
+    # Extract the UI type and PDF path
+    ui_type = sys.argv[2].lower() if len(sys.argv) > 2 else "classic"
     pdf_path = sys.argv[3] if len(sys.argv) > 3 else None
 
     # Debug prints to verify parsed arguments
