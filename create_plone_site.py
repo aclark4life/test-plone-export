@@ -79,7 +79,10 @@ def create_plone_site(app, ui_type="classic", pdf_path=None):
 if __name__ == "__main__":
     app = globals().get("app")
 
-    # Check command-line arguments
+    # Debug prints to check received arguments
+    print(f"Raw arguments: {sys.argv}")
+
+    # Ensure that at least two arguments are present
     if len(sys.argv) < 2:
         print("Usage: zconsole run create_plone_site.py <classic|volto> [pdf_path]")
         sys.exit(1)
@@ -87,7 +90,7 @@ if __name__ == "__main__":
     ui_type = sys.argv[1].lower()
     pdf_path = sys.argv[2] if len(sys.argv) > 2 else None
 
-    # Debug print to verify arguments
+    # Debug prints to verify parsed arguments
     print(f"UI Type: {ui_type}")
     print(f"PDF Path: {pdf_path}")
 
