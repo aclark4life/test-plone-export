@@ -3,7 +3,7 @@ from Products.CMFPlone.factory import addPloneSite
 from transaction import commit
 from plone.namedfile.file import NamedBlobFile
 
-def create_plone_site(app, ui_type="classic"):
+def create_plone_site(app, ui_type="classic", pdf_path=None):
     site_id = "Plone"
 
     # Check if the site already exists
@@ -47,25 +47,26 @@ def create_plone_site(app, ui_type="classic"):
         item_id = "example-file"
         item_title = "Example File"
         
-        try:
-            with open("alex-clark-resume.pdf", "rb") as pdf_file:
-                pdf_data = pdf_file.read()
+        if pdf_path:
+            try:
+                with open(pdf_path, "rb") as pdf_file:
+                    pdf_data = pdf_file.read()
 
-            # Create a NamedBlobFile for the PDF data
-            pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
+                # Create a NamedBlobFile for the PDF data
+                pdf_blob = NamedBlobFile(data=pdf_data, filename="file.pdf")
 
-            # Add the File content type
-            site.invokeFactory(
-                type_name="File",  # Ensure "File" content type is available
-                id=item_id,
-                title=item_title,
-                file=pdf_blob,
-            )
-            print(f"File '{item_id}' added to the site '{site_id}' successfully.")
-        except ValueError:
-            print("File content type not found. Checking other content types.")
-            # Handle case where 'File' is not available
-            raise
+                # Add the File content type
+                site.invokeFactory(
+                    type_name="File",  # Ensure "File" content type is available
+                    id=item_id,
+                    title=item_title,
+                    file=pdf_blob,
+                )
+                print(f"File '{item_id}' added to the site '{site_id}' successfully.")
+            except Exception as e:
+                print(f"Failed to add file: {e}")
+        else:
+            print("No PDF file path provided. Skipping file addition.")
         
         # Commit the transaction to save the changes
         commit()
@@ -78,11 +79,11 @@ def create_plone_site(app, ui_type="classic"):
 if __name__ == "__main__":
     app = globals().get("app")
 
-    # The correct argument for UI type should be the last one
+    # Check command-line arguments
     if len(sys.argv) < 2:
-        print("Usage: zconsole run create_plone_site.py <classic|volto>")
+        print("Usage: zconsole run create_plone_site.py <classic|volto> [pdf_path]")
         sys.exit(1)
 
-    # Get the last argument which should be the UI type
-    ui_type = sys.argv[-1].lower()
-    create_plone_site(app, ui_type)
+    ui_type = sys.argv[1].lower()
+    pdf_path = sys.argv[2] if len(sys.argv) > 2 else None
+    create_plone_site(app, ui_type, pdf_path)
