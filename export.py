@@ -62,27 +62,27 @@ def traverse_and_export(context, base_path):
             # os.makedirs(os.path.dirname(file_path), exist_ok=True)
             # print(f"Created directories for {os.path.dirname(file_path)}.")
 
-            # Write content to file based on type              
+            # Write content to file based on type
             if obj.portal_type in ["Document", "News Item"]:
                 content = f"Title: {obj.Title()}\n\nDescription: {obj.Description()}\n\nText: {obj.getText()}"
                 if not file_path.endswith(".txt"):
                     file_path += ".txt"
                 write_content_to_file(file_path, content.encode("utf-8"))
                 print(f"Exported: {file_path}")
-            elif obj.portal_type == "File":      
-                if hasattr(obj, "file") and obj.file:       
-                    file_data = obj.file.data                                                                 
-                    mime_type = obj.file.contentType                              
+            elif obj.portal_type == "File":
+                if hasattr(obj, "file") and obj.file:
+                    file_data = obj.file.data
+                    mime_type = obj.file.contentType
                     extension = get_file_extension(mime_type)
                     if not file_path.endswith(extension):
                         file_path += extension
                     write_content_to_file(file_path, file_data, binary=True)
                     print(f"Exported: {file_path}")
-                else:                                                         
-                    print(                          
+                else:
+                    print(
                         f"Skipping file export for {file_path} due to missing file attribute."
-                    )                                                                   
-            else:                                             
+                    )
+            else:
                 print(
                     f"Skipping unsupported content type {obj.portal_type} at {relative_path}"
                 )
