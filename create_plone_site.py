@@ -86,4 +86,9 @@ if __name__ == "__main__":
 
     ui_type = sys.argv[1].lower()
     pdf_path = sys.argv[2] if len(sys.argv) > 2 else None
+
+    # Debug print to verify arguments
+    print(f"UI Type: {ui_type}")
+    print(f"PDF Path: {pdf_path}")
+
     create_plone_site(app, ui_type, pdf_path)
