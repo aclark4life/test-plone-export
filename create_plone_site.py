@@ -1,57 +1,48 @@
-import sys
+from AccessControl.SecurityManagement import newSecurityManager
+from Testing.makerequest import makerequest
+from zope.component.hooks import setSite
 from Products.CMFPlone.factory import addPloneSite
-from transaction import commit
+from Products.CMFPlone.utils import get_installer
 
+# Assume 'app' is the Zope application server root
+app = makerequest(app)
 
-def create_plone_site(app, ui_type="classic"):
-    site_id = "Plone"
+# Set the admin user as the current user
+user_id = 'admin'  # Replace with your actual admin user ID
+user = app.acl_users.getUserById(user_id)
+if not user:
+    raise ValueError(f"User '{user_id}' not found")
 
-    # Check if the site already exists
-    if site_id not in app.objectIds():
-        # Determine the add-on profiles to install based on the UI type
-        if ui_type == "classic":
-            add_on_profiles = [
-                "Products.CMFPlone:plone",  # Classic Plone UI
-                "plonetheme.barceloneta:default",  # Default theme for classic UI
-            ]
-            title = "My Classic Plone Site"
-        elif ui_type == "volto":
-            add_on_profiles = [
-                "Products.CMFPlone:plone",  # Base Plone setup
-                "plone.restapi:default",  # REST API needed for Volto
-                "plone.volto:default",  # Volto frontend
-            ]
-            title = "My Volto Plone Site"
-        else:
-            print(f"Unknown UI type: {ui_type}")
-            sys.exit(1)
+newSecurityManager(None, user)
 
-        # Create the Plone site with the specified add-ons
-        addPloneSite(
-            app,
-            site_id,
-            title=title,
-            extension_ids=add_on_profiles,
-            setup_content=True,  # Optional: Create default content
-        )
+# Create the Plone site
+site_id = 'MyPloneSite'
+site_title = 'My Plone Site'
+language = 'en'
 
-        # Commit the transaction to save the changes
-        commit()
+# Check if the site already exists
+if site_id not in app.objectIds():
+    addPloneSite(
+        app,
+        site_id,
+        title=site_title,
+        extension_ids=('plonetheme.classic:default',),  # Add your theme and other profiles
+        setup_content=True,
+        default_language=language,
+    )
 
-        print(f"Plone site '{site_id}' with the {ui_type} UI created successfully.")
-    else:
-        print(f"Plone site '{site_id}' already exists.")
+# Get the created site
+site = app[site_id]
 
+# Set the site context
+setSite(site)
 
-# This is the entry point for zconsole run
-if __name__ == "__main__":
-    app = globals().get("app")
+# Install additional products or themes
+installer = get_installer(site)
+installer.install_product('plonetheme.classic')
 
-    # The correct argument for UI type should be the last one
-    if len(sys.argv) < 2:
-        print("Usage: zconsole run create_plone_site.py <classic|volto>")
-        sys.exit(1)
+# Commit the transaction to save changes
+import transaction
+transaction.commit()
 
-    # Get the last argument which should be the UI type
-    ui_type = sys.argv[-1].lower()
-    create_plone_site(app, ui_type)
+# Now your Plone site is created programmatically with a classic theme.
