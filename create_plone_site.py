@@ -38,7 +38,7 @@ def create_plone_site(app, ui_type="classic", pdf_path=None):
         )
 
         # Commit the transaction to save the changes
-        commit()
+        # commit()
 
         print(f"Plone site '{site_id}' with the {ui_type} UI created successfully.")
         
