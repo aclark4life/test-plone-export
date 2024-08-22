@@ -13,7 +13,6 @@ def create_plone_site(app, ui_type="classic"):
             add_on_profiles = [
                 "Products.CMFPlone:plone",  # Classic Plone UI
                 "plonetheme.barceloneta:default",  # Default theme for classic UI
-                "plone.app.contenttypes:default",  # Default content types
             ]
             title = "My Classic Plone Site"
         elif ui_type == "volto":
