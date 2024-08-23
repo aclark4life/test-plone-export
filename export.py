@@ -4,10 +4,12 @@ import transaction
 from zope.component.hooks import setSite
 from Products.CMFCore.utils import getToolByName
 
-
-# Function to write content to file
+# Function to write content to file      
 def write_content_to_file(filepath, content, binary=False):
-    mode = "wb" if binary else "w"
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    
+    mode = "wb" if binary else "w"                            
     with open(filepath, mode) as file:
         file.write(content)
 
