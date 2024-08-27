@@ -1,21 +1,18 @@
 import os
 import mimetypes
 import transaction
-from optparse import OptionParser
+from zope.component.hooks import setSite
 from Products.CMFCore.utils import getToolByName
 
-# Function to write content to file
+# Function to write content to file      
 def write_content_to_file(filepath, content, binary=False):
-    if binary:
-        mode = "wb"
-    else:
-        mode = "w"
+    # Ensure the directory exists
+    if not os.path.exists(os.path.dirname(filepath)):
+        os.makedirs(os.path.dirname(filepath))
     
-    file = open(filepath, mode)
-    try:
+    mode = "wb" if binary else "w"                            
+    with open(filepath, mode) as file:
         file.write(content)
-    finally:
-        file.close()
 
 # Function to get the correct file extension based on MIME type
 def get_file_extension(mime_type):
@@ -23,15 +20,10 @@ def get_file_extension(mime_type):
 
 # Function to traverse and export content
 def traverse_and_export(context, base_path):
-    print "Debug: Starting traverse_and_export"
-    
     catalog = getToolByName(context, "portal_catalog")
-    if not catalog:
-        print "Debug: Could not get 'portal_catalog' tool from context."
-        return
 
     # Debug: print catalog details
-    print "Catalog found: %s" % catalog
+    print("Catalog found: {}".format(catalog))
 
     # Comprehensive query to include multiple content types and nested content
     query = {
@@ -43,104 +35,77 @@ def traverse_and_export(context, base_path):
         ],  # Adjust content types as needed
         "path": "/".join(context.getPhysicalPath()),
     }
-    print "Debug: Query for catalog: %s" % query
     results = catalog.unrestrictedSearchResults(query)
 
     # Debug: print number of results
-    print "Debug: Found %d content objects to export with query %s." % (len(results), query)
+    print("Found {} content objects to export with query {}.".format(len(results), query))
 
     if len(results) == 0:
-        print "No content found in the catalog. Please verify the following:"
-        print "- Ensure that there are content objects created in your Plone site."
-        print "- Check if the catalog is properly indexed."
-        print "- Ensure that you have the necessary permissions to access content."
+        print("No content found in the catalog. Please verify the following:")
+        print("- Ensure that there are content objects created in your Plone site.")
+        print("- Check if the catalog is properly indexed.")
+        print("- Ensure that you have the necessary permissions to access content.")
 
-    extensions = []
     for brain in results:
         try:
             obj = brain.getObject()
-        except:
-            print "Debug: Can't get object"
-            continue
-        
-        # print "Debug: Processing object with ID %s" % obj.getId()
-        relative_path = "/".join(
-            obj.getPhysicalPath()[2:]
-        )  # Get path relative to Plone site
-        file_path = os.path.join(base_path, relative_path)
+            relative_path = "/".join(
+                obj.getPhysicalPath()[2:]
+            )  # Get path relative to Plone site
+            file_path = os.path.join(base_path, relative_path)
 
-        # Debug: print object details
-        if obj.portal_type == "File":
-            extension = get_file_extension(obj.get_content_type())
+            # Debug: print object details
+            print("Processing object at {} with ID {} and type {}.".format(relative_path, obj.getId(), obj.portal_type))
 
-            if not extension in extensions:
-                extensions.append(extension)
-            print "Debug: Object at %s with ID %s and type %s and extension %s." % (
-                relative_path, obj.getId(), obj.portal_type, extension
-            )
+            # Ensure the directory exists
+            if not os.path.exists(os.path.dirname(file_path)):
+                os.makedirs(os.path.dirname(file_path))
+                print("Created directories for {}.".format(os.path.dirname(file_path)))
 
-        # Ensure the directory exists
-        # dir_path = os.path.dirname(file_path)
-        # if not os.path.exists(file_path):
-        #     os.makedirs(file_path)
-        #     print "Created directories for %s." % file_path
+            # Write content to file based on type
+            if obj.portal_type in ["Document", "News Item"]:
+                content = "Title: {}\n\nDescription: {}\n\nText: {}".format(obj.Title(), obj.Description(), obj.getText())
+                if not file_path.endswith(".txt"):
+                    file_path += ".txt"
+                write_content_to_file(file_path, content.encode("utf-8"))
+                print("Exported: {}".format(file_path))
+            elif obj.portal_type == "File":
+                if hasattr(obj, "file") and obj.file:
+                    file_data = obj.file.data
+                    mime_type = obj.file.contentType
+                    extension = get_file_extension(mime_type)
+                    if not file_path.endswith(extension):
+                        file_path += extension
+                    write_content_to_file(file_path, file_data, binary=True)
+                    print("Exported: {}".format(file_path))
+                else:
+                    print("Skipping file export for {} due to missing file attribute.".format(file_path))
+            else:
+                print("Skipping unsupported content type {} at {}".format(obj.portal_type, relative_path))
 
-        # # Write content to file based on type
-        # if obj.portal_type in ["Document", "News Item"]:
-        #     content = "Title: %s\n\nDescription: %s\n\nText: %s" % (
-        #         obj.Title(), obj.Description(), obj.getText()
-        #     )
-        #     write_content_to_file(os.path.join(file_path, file_path + ".txt"), content.encode("utf-8"))
-        #     print "Exported: %s.txt" % file_path
-        # elif obj.portal_type == "File":
-        #     if hasattr(obj, "file") and obj.file:
-        #         file_data = obj.file.data
-        #         mime_type = obj.file.contentType
-        #         extension = get_file_extension(mime_type)
-        #         write_content_to_file(file_path + extension, file_data, binary=True)
-        #         print "Exported: %s%s" % (file_path, extension)
-        #     else:
-        #         print "Skipping file export for %s due to missing file attribute." % file_path
-        # else:
-        #     print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
+        except Exception as e:
+            print("Error processing object at {}: {}".format(brain.getPath(), e))
 
-    print "File extensions:"
-    print " ".join(extensions)
+def main(app):
+    try:
+        site = app.Plone
+        setSite(site)
 
-def main():
-    parser = OptionParser(usage="usage: %prog [options] site_name export_base_path")
-    parser.add_option("-s", "--site", dest="site_name",
-                      help="Name of the Plone site to export from.")
-    parser.add_option("-e", "--export", dest="export_base_path",
-                      help="Base path where exported files will be saved.")
-    (options, args) = parser.parse_args()
+        # Debug: print site details
+        print("Connected to Plone site: {}".format(site))
 
-    print options, args
-    if not options.site_name or not options.export_base_path:
-        parser.print_help()
-        return
+        export_base_path = "export"  # Change this to the desired export directory
+        if not os.path.exists(export_base_path):
+            os.makedirs(export_base_path)
+            print("Created export base directory at {}.".format(export_base_path))
 
-    site_name = options.site_name
-    print "Debug: Attempting to find site: %s" % site_name
-    
-    site = getattr(app, site_name, None)
-    if site is None:
-        print "Debug: Site %s not found directly. Trying 'Plone'." % site_name
-        site = getattr(app, 'Plone', None)
-        if site is None:
-            raise AttributeError("Site %s not found in app." % site_name)
-    
-    print "Connected to Plone site: %s" % site
+        traverse_and_export(site, export_base_path)
+        transaction.commit()
+        print("Export completed.")
 
-    export_base_path = options.export_base_path
-    if not os.path.exists(export_base_path):
-        os.makedirs(export_base_path)
-        print "Created export base directory at %s." % export_base_path
-
-    traverse_and_export(site, export_base_path)
-    transaction.commit()
-    print "Export completed."
-
+    except AttributeError:
+        print("Error: Could not find the Plone site at app.Plone.")
+        print("Make sure the Plone site exists and is correctly referenced.")
 
 if __name__ == "__main__":
-    main()
+    main(app)  # noqa
