@@ -13,7 +13,11 @@ def write_content_to_file(filepath, content, binary=False):
     # Ensure the directory exists
     dirname = os.path.dirname(filepath)
     print "Debug: Creating dir %s" % dirname
-    os.makedirs(dirname)
+
+    try:
+        os.makedirs(dirname)
+    except OSError:
+        print "Debug: Directory %s already exists." % dirname
 
     if binary:
         mode = "wb"
