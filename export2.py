@@ -83,6 +83,8 @@ def traverse_and_export(context, base_path):
                 file_data = obj.data
                 mime_type = obj.content_type
                 extension = get_file_extension(mime_type)
+                if not file_path.endswith(extension):
+                    file_path += extension
                 write_content_to_file(file_path + extension, file_data, binary=True)
                 print "Exported: %s%s" % (file_path, extension)
             else:
