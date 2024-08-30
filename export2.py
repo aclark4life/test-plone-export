@@ -75,7 +75,7 @@ def traverse_and_export(context, base_path):
         if obj.portal_type == "File":
             if hasattr(obj, "data"): 
                 file_data = obj.data
-                mime_type = obj.contentType
+                mime_type = obj.content_type
                 extension = get_file_extension(mime_type)
                 write_content_to_file(file_path + extension, file_data, binary=True)
                 print "Exported: %s%s" % (file_path, extension)
