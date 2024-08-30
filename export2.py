@@ -11,7 +11,9 @@ PORTAL_TYPES = ["File", ]  # Add more types as needed
 # Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
     # Ensure the directory exists
-    os.makedirs(os.path.dirname(filepath), mode=0755)
+    dirname = os.path.dirname(filepath)
+    print "Debug: Creating dir %s" % dirname
+    os.makedirs(dirname)
 
     if binary:
         mode = "wb"
