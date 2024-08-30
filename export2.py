@@ -4,8 +4,15 @@ import transaction
 from optparse import OptionParser
 from Products.CMFCore.utils import getToolByName
 
+
+PORTAL_TYPES = ["File", ]  # Add more types as needed
+
+
 # Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
     if binary:
         mode = "wb"
     else:
@@ -35,12 +42,7 @@ def traverse_and_export(context, base_path):
 
     # Comprehensive query to include multiple content types and nested content
     query = {
-        "portal_type": [
-            "Document",
-            "News Item",
-            "File",
-            "Folder",
-        ],  # Adjust content types as needed
+        "portal_type": PORTAL_TYPES, # Adjust content types as needed
         "path": "/".join(context.getPhysicalPath()),
     }
     print "Debug: Query for catalog: %s" % query
@@ -69,40 +71,18 @@ def traverse_and_export(context, base_path):
         )  # Get path relative to Plone site
         file_path = os.path.join(base_path, relative_path)
 
-        # Debug: print object details
+        # Write content to file based on type
         if obj.portal_type == "File":
-            extension = get_file_extension(obj.get_content_type())
-
-            if not extension in extensions:
-                extensions.append(extension)
-            print "Debug: Object at %s with ID %s and type %s and extension %s." % (
-                relative_path, obj.getId(), obj.portal_type, extension
-            )
-
-        # Ensure the directory exists
-        # dir_path = os.path.dirname(file_path)
-        # if not os.path.exists(file_path):
-        #     os.makedirs(file_path)
-        #     print "Created directories for %s." % file_path
-
-        # # Write content to file based on type
-        # if obj.portal_type in ["Document", "News Item"]:
-        #     content = "Title: %s\n\nDescription: %s\n\nText: %s" % (
-        #         obj.Title(), obj.Description(), obj.getText()
-        #     )
-        #     write_content_to_file(os.path.join(file_path, file_path + ".txt"), content.encode("utf-8"))
-        #     print "Exported: %s.txt" % file_path
-        # elif obj.portal_type == "File":
-        #     if hasattr(obj, "file") and obj.file:
-        #         file_data = obj.file.data
-        #         mime_type = obj.file.contentType
-        #         extension = get_file_extension(mime_type)
-        #         write_content_to_file(file_path + extension, file_data, binary=True)
-        #         print "Exported: %s%s" % (file_path, extension)
-        #     else:
-        #         print "Skipping file export for %s due to missing file attribute." % file_path
-        # else:
-        #     print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
+            if hasattr(obj, "file") and obj.file:
+                file_data = obj.file.data
+                mime_type = obj.file.contentType
+                extension = get_file_extension(mime_type)
+                write_content_to_file(file_path + extension, file_data, binary=True)
+                print "Exported: %s%s" % (file_path, extension)
+            else:
+                print "Skipping file export for %s due to missing file attribute." % file_path
+        else:
+            print "Skipping unsupported content type %s at %s" % (obj.portal_type, relative_path)
 
     print "File extensions:"
     print " ".join(extensions)

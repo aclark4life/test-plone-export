@@ -4,12 +4,18 @@ import transaction
 from zope.component.hooks import setSite
 from Products.CMFCore.utils import getToolByName
 
-# Function to write content to file      
+
+PORTAL_TYPES = [
+    "File",
+]  # Add more types as needed
+
+
+# Function to write content to file
 def write_content_to_file(filepath, content, binary=False):
     # Ensure the directory exists
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    
-    mode = "wb" if binary else "w"                            
+
+    mode = "wb" if binary else "w"
     with open(filepath, mode) as file:
         file.write(content)
 
@@ -28,11 +34,7 @@ def traverse_and_export(context, base_path):
 
     # Comprehensive query to include multiple content types and nested content
     query = {
-        "portal_type": [
-            "Document",
-            "News Item",
-            "File",
-            "Folder",
+        "portal_type": PORTAL_TYPES,
         ],  # Adjust content types as needed
         "path": "/".join(context.getPhysicalPath()),
     }
@@ -60,18 +62,8 @@ def traverse_and_export(context, base_path):
                 f"Processing object at {relative_path} with ID {obj.getId()} and type {obj.portal_type}."
             )
 
-            # Ensure the directory exists
-            # os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            # print(f"Created directories for {os.path.dirname(file_path)}.")
-
             # Write content to file based on type
-            if obj.portal_type in ["Document", "News Item"]:
-                content = f"Title: {obj.Title()}\n\nDescription: {obj.Description()}\n\nText: {obj.getText()}"
-                if not file_path.endswith(".txt"):
-                    file_path += ".txt"
-                write_content_to_file(file_path, content.encode("utf-8"))
-                print(f"Exported: {file_path}")
-            elif obj.portal_type == "File":
+            if obj.portal_type == "File":
                 if hasattr(obj, "file") and obj.file:
                     file_data = obj.file.data
                     mime_type = obj.file.contentType
