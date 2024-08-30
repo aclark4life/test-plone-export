@@ -85,7 +85,7 @@ def traverse_and_export(context, base_path):
                 extension = get_file_extension(mime_type)
                 if not file_path.endswith(extension):
                     file_path += extension
-                write_content_to_file(file_path + extension, file_data, binary=True)
+                write_content_to_file(file_path, file_data, binary=True)
                 print "Exported: %s%s" % (file_path, extension)
             else:
                 print "Skipping file export for %s due to missing file attribute." % file_path
