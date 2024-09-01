@@ -3861,7 +3861,7 @@ django-template-offcanvas-default:
 	-$(GIT_ADD) backend/templates/offcanvas.html
 
 .PHONY: django-test-default
-django-test-default: npm-install django-static pip-install-test
+django-test-default:
 	python manage.py test
 
 .PHONY: django-unit-test-demo-default
@@ -4362,6 +4362,13 @@ python-serve-default:
 	@echo "\n\tServing HTTP on http://0.0.0.0:8000\n"
 	$(PYTHON_HTTP_SERVER)
 
+
+.PHONY: python-venv-check-default
+python-venv-check-default:
+ifndef VIRTUAL_ENV
+	$(error VIRTUAL_ENV is not set)
+endif
+
 .PHONY: python-webpack-init-default
 python-webpack-init-default:
 	python manage.py webpack_init --no-input
@@ -4661,7 +4668,7 @@ h-default: help
 ignore-default: git-commit-message-ignore git-push
 
 .PHONY: init-default
-init-default: django-init-wagtail django-serve
+init-default: python-venv-check django-init-wagtail django-serve
 
 .PHONY: install-default
 install-default: pip-install
@@ -4733,7 +4740,7 @@ static-default: django-static
 su-default: django-su
 
 .PHONY: test-default
-test-default: django-test
+test-default: npm-install django-static pip-install-test
 
 .PHONY: t-default
 t-default: test
